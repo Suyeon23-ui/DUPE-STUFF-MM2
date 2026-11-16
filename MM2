@@ -1,0 +1,160 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SUYEON-DUPE"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(320, 300)
+frame.Position = UDim2.new(0.5, -160, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(10, 18, 38)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(30, 130, 255)
+stroke.Thickness = 2
+stroke.Parent = frame
+
+-- Title bar
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -75, 0, 45)
+title.Position = UDim2.fromOffset(12, 0)
+title.BackgroundTransparency = 1
+title.Text = "SUYEON-DUPE"
+title.TextColor3 = Color3.fromRGB(70, 160, 255)
+title.TextSize = 23
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+-- Minimize
+local minimize = Instance.new("TextButton")
+minimize.Size = UDim2.fromOffset(35, 30)
+minimize.Position = UDim2.new(1, -78, 0, 8)
+minimize.Text = "-"
+minimize.TextSize = 22
+minimize.Parent = frame
+
+-- Close
+local close = Instance.new("TextButton")
+close.Size = UDim2.fromOffset(30, 30)
+close.Position = UDim2.new(1, -38, 0, 8)
+close.Text = "X"
+close.Parent = frame
+
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, 0, 1, -50)
+content.Position = UDim2.fromOffset(0, 50)
+content.BackgroundTransparency = 1
+content.Parent = frame
+
+local selector = Instance.new("TextButton")
+selector.Size = UDim2.new(1, -40, 0, 40)
+selector.Position = UDim2.fromOffset(20, 10)
+selector.Text = "SELECT ITEM: KNIFE"
+selector.BackgroundColor3 = Color3.fromRGB(20, 50, 90)
+selector.TextColor3 = Color3.new(1,1,1)
+selector.Font = Enum.Font.GothamBold
+selector.Parent = content
+
+local items = {"KNIFE", "GUN"}
+local selected = 1
+
+selector.MouseButton1Click:Connect(function()
+    selected = selected % #items + 1
+    selector.Text = "SELECT ITEM: " .. items[selected]
+end)
+
+local dupe = Instance.new("TextButton")
+dupe.Size = UDim2.new(1, -40, 0, 45)
+dupe.Position = UDim2.fromOffset(20, 65)
+dupe.Text = "DUPE ITEM"
+dupe.BackgroundColor3 = Color3.fromRGB(20, 110, 230)
+dupe.TextColor3 = Color3.new(1,1,1)
+dupe.Font = Enum.Font.GothamBold
+dupe.TextSize = 19
+dupe.Parent = content
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -40, 0, 30)
+status.Position = UDim2.fromOffset(20, 120)
+status.BackgroundTransparency = 1
+status.Text = "STATUS: READY"
+status.TextColor3 = Color3.fromRGB(100, 190, 255)
+status.Parent = content
+
+local bar = Instance.new("Frame")
+bar.Size = UDim2.new(1, -40, 0, 12)
+bar.Position = UDim2.fromOffset(20, 155)
+bar.BackgroundColor3 = Color3.fromRGB(35, 45, 65)
+bar.Parent = content
+
+local fill = Instance.new("Frame")
+fill.Size = UDim2.new(0, 0, 1, 0)
+fill.BackgroundColor3 = Color3.fromRGB(30, 145, 255)
+fill.Parent = bar
+
+local count = 0
+local busy = false
+
+dupe.MouseButton1Click:Connect(function()
+    if busy then return end
+    busy = true
+    status.Text = "STATUS: SIMULATING..."
+    fill.Size = UDim2.new(0, 0, 1, 0)
+
+    for i = 1, 10 do
+        fill.Size = UDim2.new(i / 10, 0, 1, 0)
+        task.wait(0.1)
+    end
+
+    count += 1
+    status.Text = "SIMULATED " .. items[selected] .. " #" .. count
+    busy = false
+end)
+
+minimize.MouseButton1Click:Connect(function()
+    content.Visible = not content.Visible
+    frame.Size = content.Visible and
+        UDim2.fromOffset(320, 300) or UDim2.fromOffset(320, 50)
+end)
+
+close.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- Draggable window
+local dragging, dragStart, startPos
+
+title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
